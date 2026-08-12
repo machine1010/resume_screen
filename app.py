@@ -107,9 +107,9 @@ def process_candidate_resumes(api_key: str, pdf_paths: List[str], blacklisted_pr
 # ---------------------------------------------------------------------------
 # 4. Streamlit User Interface
 # ---------------------------------------------------------------------------
-st.set_page_config(page_title="Resume Forensic Auditor", layout="wide")
+st.set_page_config(page_title="Resume Auditor", layout="wide")
 
-st.title("🕵️‍♂️ HR Forensic Auditor & Resume Scanner")
+st.title("🕵️‍♂️ HR Resume Scanner")
 st.markdown("Upload candidate resumes (PDFs) to run a forensic 11-point audit and download the results as a CSV.")
 
 # --- Sidebar Controls ---
