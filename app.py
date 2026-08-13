@@ -39,7 +39,7 @@ AUDIT CHECKS TO EXECUTE:
 5. Company-to-Company Tenure Overlap (Concurrent full-time employment).
 6. Career Trajectory & Title Escalation (Unrealistic title jumps).
 7. Recent Skills Application Check (Last 1 Year): Verify claimed skills appear in projects worked on in the last 1 year.
-8. Experience Range Filter (4 to 8 Years): Total experience MUST be between 4 and 8 years. Flag as RED_FLAG if outside 4-8 years.
+8. Experience Range Filter (5 to 8 Years): Total experience MUST be between 4 and 8 years. Flag as RED_FLAG if outside 5-8 years.
 9. Blacklisted Project Audit: Compare listed projects against this blacklist:
     {blacklisted_projects_str}
     Flag as RED_FLAG if any match is found.
