@@ -22,6 +22,9 @@ class AuditCheckItem(BaseModel):
     )
 
 class CandidateResumeAudit(BaseModel):
+    candidate_name: str = Field(
+        description="The full name of the candidate extracted from the resume."
+    )
     checks: List[AuditCheckItem]
 
 # ---------------------------------------------------------------------------
@@ -29,16 +32,16 @@ class CandidateResumeAudit(BaseModel):
 # ---------------------------------------------------------------------------
 SYSTEM_INSTRUCTION_TEMPLATE = """
 You are an expert HR Forensic Auditor and Resume Authenticity Specialist.
-Analyze the candidate's resume PDF and execute live web lookups where necessary.
+Analyze the candidate's resume PDF and execute live web lookups where necessary. Extract the candidate's full name.
 
 AUDIT CHECKS TO EXECUTE:
 1. Contact Info Verification (Email and Phone validation).
 2. LinkedIn Profile Extraction & Live Web Verification (Connection count and profile match).
-3. Career Gap Analysis (Identify gaps > 3 months).
+3. Career Gap Analysis (Identify gaps > 3 months for most recent Career Gap).
 4. Education & Work Experience Overlap (Degrees overlapping full-time jobs).
 5. Company-to-Company Tenure Overlap (Concurrent full-time employment).
 6. Career Trajectory & Title Escalation (Unrealistic title jumps).
-7. Recent Skills Application Check (Last 1 Year): Verify claimed skills appear in projects worked on in the last 1 year.
+7. Recent Skills Application Check (Last 1 Year): Verify skills(snowflake and DBT(data build tool) ) appear in projects worked on in the last 1 year.
 8. Experience Range Filter (5 to 8 Years): Total experience MUST be between 4 and 8 years. Flag as RED_FLAG if outside 5-8 years.
 9. Blacklisted Project Audit: Compare listed projects against this blacklist:
     {blacklisted_projects_str}
@@ -78,7 +81,7 @@ def process_candidate_resumes(api_key: str, uploaded_files_list: List, blacklist
 
             # Generate content using inline PDF bytes
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-3.6-flash",
                 contents=[
                     pdf_part,
                     f"Perform a full forensic audit on '{file_name}'. Verify total work experience is 4-8 years, scan for recent skills in 1-year projects, check against blacklisted projects, and execute all 11 audit checks."
@@ -95,6 +98,7 @@ def process_candidate_resumes(api_key: str, uploaded_files_list: List, blacklist
 
             for check in audit_result.checks:
                 all_report_rows.append({
+                    "Candidate Name": audit_result.candidate_name,
                     "File Name": file_name,
                     "Check Name": check.check_name,
                     "Findings / Outcome": check.outcome,
@@ -103,6 +107,7 @@ def process_candidate_resumes(api_key: str, uploaded_files_list: List, blacklist
 
         except Exception as e:
             all_report_rows.append({
+                "Candidate Name": "Unknown",
                 "File Name": file_name,
                 "Check Name": "Processing Error",
                 "Findings / Outcome": f"Failed to audit: {str(e)}",
