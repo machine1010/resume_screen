@@ -51,7 +51,8 @@ AUDIT CHECKS TO EXECUTE:
 # 3. Processing Function
 # ---------------------------------------------------------------------------
 def process_candidate_resumes(api_key: str, pdf_paths: List[str], blacklisted_projects: List[str]) -> pd.DataFrame:
-    client = genai.Client(api_key=api_key)
+    ###client = genai.Client(api_key=api_key)
+    client = genai.Client(vertexai=True, api_key=api_key)
 
     # Format blacklist into bulleted string
     blacklist_formatted = "\n".join([f"- {proj}" for proj in blacklisted_projects])
