@@ -48,10 +48,10 @@ AUDIT CHECKS TO EXECUTE:
 """
 
 # ---------------------------------------------------------------------------
-# 3. Processing Function
+# 3. Processing Function (Option 2: Vertex AI Direct Bytes Injection)
 # ---------------------------------------------------------------------------
-def process_candidate_resumes(api_key: str, pdf_paths: List[str], blacklisted_projects: List[str]) -> pd.DataFrame:
-    ###client = genai.Client(api_key=api_key)
+def process_candidate_resumes(api_key: str, uploaded_files_list: List, blacklisted_projects: List[str]) -> pd.DataFrame:
+    # Initialize client for Vertex AI
     client = genai.Client(vertexai=True, api_key=api_key)
 
     # Format blacklist into bulleted string
@@ -64,17 +64,24 @@ def process_candidate_resumes(api_key: str, pdf_paths: List[str], blacklisted_pr
 
     all_report_rows = []
 
-    for pdf_path in pdf_paths:
-        file_name = os.path.basename(pdf_path)
+    for uploaded_file in uploaded_files_list:
+        file_name = uploaded_file.name
         
         try:
-            # Upload to Gemini
-            uploaded_file = client.files.upload(file=pdf_path)
+            # Read raw binary data directly from Streamlit's UploadedFile object
+            pdf_bytes = uploaded_file.getvalue()
 
+            # Create a inline Part object using types.Part.from_bytes
+            pdf_part = types.Part.from_bytes(
+                data=pdf_bytes,
+                mime_type="application/pdf"
+            )
+
+            # Generate content using inline PDF bytes
             response = client.models.generate_content(
-                model="gemini-3.6-flash",
+                model="gemini-2.5-flash",
                 contents=[
-                    uploaded_file,
+                    pdf_part,
                     f"Perform a full forensic audit on '{file_name}'. Verify total work experience is 4-8 years, scan for recent skills in 1-year projects, check against blacklisted projects, and execute all 11 audit checks."
                 ],
                 config=types.GenerateContentConfig(
@@ -118,8 +125,11 @@ with st.sidebar:
     st.header("Configuration")
     
     # Securely handle the API key
-    api_key_input = st.text_input("Google Gemini API Key", type="password", 
-                                  help="Get your key from Google AI Studio. It is only used during this session.")
+    api_key_input = st.text_input(
+        "Vertex AI / Express API Key", 
+        type="password", 
+        help="Provide your authentication key."
+    )
     
     # Editable Blacklist Projects
     st.subheader("Blacklisted Projects")
@@ -136,39 +146,28 @@ uploaded_files = st.file_uploader("Upload PDF Resumes", type=["pdf"], accept_mul
 
 if st.button("Run Audit"):
     if not api_key_input:
-        st.error("Please provide a Gemini API Key in the sidebar.")
+        st.error("Please provide an API Key in the sidebar.")
     elif not uploaded_files:
         st.warning("Please upload at least one PDF file.")
     else:
         # Parse blacklist textarea into a Python list
         blacklist_projects = [line.strip() for line in blacklist_text.split("\n") if line.strip()]
         
-        # Use a temporary directory to store files so the Gemini SDK can read them
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_file_paths = []
-            
-            # Save uploaded bytes to physical temporary files
-            for uploaded_file in uploaded_files:
-                temp_path = os.path.join(temp_dir, uploaded_file.name)
-                with open(temp_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                temp_file_paths.append(temp_path)
-            
-            # Run Process
-            with st.spinner(f"Auditing {len(temp_file_paths)} resume(s)... This may take a minute."):
-                result_df = process_candidate_resumes(api_key_input, temp_file_paths, blacklist_projects)
-            
-            st.success("Audit Complete!")
-            
-            # Display preview
-            st.subheader("Audit Results Preview")
-            st.dataframe(result_df, use_container_width=True)
-            
-            # Convert DF to CSV and create a download button
-            csv_data = result_df.to_csv(index=False).encode("utf-8")
-            st.download_button(
-                label="📥 Download Full Report (CSV)",
-                data=csv_data,
-                file_name="screen_results.csv",
-                mime="text/csv",
-            )
+        # Run Process using memory streams (no disk writing needed)
+        with st.spinner(f"Auditing {len(uploaded_files)} resume(s)... This may take a minute."):
+            result_df = process_candidate_resumes(api_key_input, uploaded_files, blacklist_projects)
+        
+        st.success("Audit Complete!")
+        
+        # Display preview
+        st.subheader("Audit Results Preview")
+        st.dataframe(result_df, use_container_width=True)
+        
+        # Convert DF to CSV and create a download button
+        csv_data = result_df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="📥 Download Full Report (CSV)",
+            data=csv_data,
+            file_name="screen_results.csv",
+            mime="text/csv",
+        )
