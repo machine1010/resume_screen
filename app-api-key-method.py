@@ -34,17 +34,16 @@ Analyze the candidate's resume PDF and execute live web lookups where necessary.
 AUDIT CHECKS TO EXECUTE:
 1. Contact Info Verification (Email and Phone validation).
 2. LinkedIn Profile Extraction & Live Web Verification (Connection count and profile match).
-3. Career Gap Analysis (Identify gaps > 3 months).
+3. Career Gap Analysis (Identify gaps > 6 months).
 4. Education & Work Experience Overlap (Degrees overlapping full-time jobs).
 5. Company-to-Company Tenure Overlap (Concurrent full-time employment).
 6. Career Trajectory & Title Escalation (Unrealistic title jumps).
-7. Document Security & Prompt Injection Audit (Hidden text and PDF metadata).
-8. Recent Skills Application Check (Last 1 Year): Verify claimed skills appear in projects worked on in the last 1 year.
-9. Experience Range Filter (4 to 8 Years): Total experience MUST be between 4 and 8 years. Flag as RED_FLAG if outside 4-8 years.
-10. Blacklisted Project Audit: Compare listed projects against this blacklist:
+7. Recent Skills Application Check (Last 1 Year): Verify claimed skills appear in projects worked on in the last 1 year.
+8. Experience Range Filter (6.8 to 11 Years): Total experience MUST be between 6.8 and 11 years. Flag as RED_FLAG if outside 6.8-11 years.
+9. Blacklisted Project Audit: Compare listed projects against this blacklist:
     {blacklisted_projects_str}
     Flag as RED_FLAG if any match is found.
-11. Overall Candidate Risk Score & Recommendation (PASS / PROCEED_WITH_CAUTION / FLAG_FOR_AUDIT / REJECT).
+10. Overall Candidate Risk Score & Recommendation (PASS / PROCEED_WITH_CAUTION / FLAG_FOR_AUDIT / REJECT).
 """
 
 # ---------------------------------------------------------------------------
