@@ -36,13 +36,12 @@ Analyze the candidate's resume PDF and execute live web lookups where necessary.
 
 AUDIT CHECKS TO EXECUTE:
 1. Contact Info Verification (Email and Phone validation).
-2. LinkedIn Profile Extraction & Live Web Verification (Connection count and profile match).
-3. Career Gap Analysis (Identify gaps > 3 months for most recent Career Gap).
+3. Career Gap Analysis (Identify gaps > 6 months for most recent Career Gap).
 4. Education & Work Experience Overlap (Degrees overlapping full-time jobs).
 5. Company-to-Company Tenure Overlap (Concurrent full-time employment).
 6. Career Trajectory & Title Escalation (Unrealistic title jumps).
 7. Recent Skills Application Check (Last 1 Year): Verify skills(snowflake and DBT(data build tool) ) appear in projects worked on in the last 1 year.
-8. Experience Range Filter (5 to 8 Years): Total experience MUST be between 4 and 8 years. Flag as RED_FLAG if outside 5-8 years.
+8. Experience Range Filter (5.7 to 10 Years): Total experience MUST be between 5.7 and 10 years. Flag as RED_FLAG if outside 5.7-10 years.
 9. Blacklisted Project Audit: Compare listed projects against this blacklist:
     {blacklisted_projects_str}
     Flag as RED_FLAG if any match is found.
